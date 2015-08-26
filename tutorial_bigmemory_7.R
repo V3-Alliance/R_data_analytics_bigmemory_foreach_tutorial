@@ -44,12 +44,12 @@ library(doMC)
 # Constants.
 
 project_storage_path <- "/lustre/pVPAC0012"
-#project_storage_path <- "/Users/developer/git/R_data_analytics_bigmemory_foreach_tutorial"
+# project_storage_path <- "/Users/developer/git/R_data_analytics_bigmemory_foreach_tutorial"
 input_folder_path <- paste(project_storage_path, "big_matrices", sep = "/")
 output_folder_path <- paste(project_storage_path, "big_matrices", sep = "/")
 
 descriptor_name <- "all.desc"
-descriptor_name <- "2008.desc"
+# descriptor_name <- "2008.desc"
 
 flight_field_names <- list (
     "Year",
@@ -89,7 +89,7 @@ missing_value <- -1
 
 attach_bigmatrix = function (file_name_desc) {
     file_path_desc <- paste(input_folder_path, file_name_desc, sep = "/")
-    cat("\nFile: ", file_name_desc, "\n")
+    cat("\nFile: ", file_name_desc)
     datadesc <- dget(file_path_desc)
     matrix_0 = attach.big.matrix(datadesc, path=input_folder_path)
     return(matrix_0)
@@ -146,9 +146,9 @@ start_time <- Sys.time()
 # Then the earliest date is returned 
 # and then aggregrated with the others.
 
-plane_start <- foreach(plane_index = 1:plane_count, .combine=c, .packages=c('doMC', 'bigmemory')) %dopar% {
+plane_start <- foreach(plane_index = 1:plane_count, .combine=rbind, .packages=c('doMC', 'bigmemory')) %dopar% {
 
-    cat("\nPlane: ", plane_index, ": ", planes[plane_index], "\n")
+    cat("\nPlane: ", plane_index, ": ", planes[plane_index])
     all_flights <- attach_bigmatrix(descriptor_name)
     # Flight dates for one plane.
     # All on one line to ensure isolation as different processes access the all_flights matrix.
@@ -158,15 +158,22 @@ plane_start <- foreach(plane_index = 1:plane_count, .combine=c, .packages=c('doM
     month_idx = 2           
     min_year <- min(flight_dates[, year_idx], na.rm=TRUE)
     dates_in_first_year_indices <- which(flight_dates[, year_idx] == min_year)
-    min_month_in_first_year <- min(flight_dates[dates_in_first_year, month_idx], na.rm=TRUE)
-    combined_months <- 12*min_year + min_month_in_first_year
-
+    min_month_in_min_year <- min(flight_dates[dates_in_first_year_indices, month_idx], na.rm=TRUE)
+	record <- c(planes[plane_index], min_year, min_month_in_min_year)
 }
+
+# Output looks like:
+#             [,1] [,2] [,3]
+# result.1    3417 2008    1
+# result.2    3743 2008    1
+# ......................
+# result.4880 3758 2008    4
 
 # Report results
-for (plane_index in 1:length(plane_start)) {
-    cat("\nFirst flight: ", plane_start[plane_index], "\n") 
+for (plane_index in 1:nrow(plane_start)) {
+    cat("\nFirst flight for: ", plane_start[plane_index, 1], "on: ", plane_start[plane_index, 2], "/", plane_start[plane_index, 3]) 
 }
+cat("\n")
 
 # Benchmark stop time and record duration.
 duration = difftime(Sys.time(), start_time, units = "secs")
