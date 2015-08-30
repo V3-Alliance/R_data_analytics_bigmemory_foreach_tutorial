@@ -190,8 +190,17 @@ plane_start <- foreach(plane_index = 1:plane_count, .combine=rbind, .packages=c(
 
     cat("\nPlane: ", plane_index, ": ", planes[plane_index])
     
-    descriptor_name = paste("all_flights_", (plane_index - 1) %% node_count + 1, ".desc", sep="")
+    # descriptor_name = paste("all_flights_", (plane_index - 1) %% node_count + 1, ".desc", sep="")
     all_flights <- attach_bigmatrix(descriptor_name)
+    
+    col_count <- 2
+    row_count <- nrow(all_flights)
+    dates_name = paste("flight_dates_", plane_index, ".matrix", sep="")
+    dates_descriptor = paste("flight_dates_", plane_index, ".desc", sep="")
+    flight_dates <- filebacked.big.matrix(row_count, col_count, type="integer", init=NULL, 
+											dimnames = NULL, separated = FALSE, 
+											backingfile = dates_name, backingpath = output_folder_path, 
+											descriptorfile = dates_descriptor)
     
     # Flight dates for one plane.
     # All on one line to ensure isolation as different processes access the all_flights matrix.
