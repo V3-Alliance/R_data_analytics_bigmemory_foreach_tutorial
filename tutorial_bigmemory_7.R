@@ -1,10 +1,27 @@
 # Tutorial 7: High Performance Data Analytics with R (package: bigmemory) 
 
+# ============================================================
+# How to manage the job execution.
+
 # Execute this code like so:
 # $ qsub pbs_R_bigmemory_7.sh
 
+# To monitor progress
+# $ qstat -u your_user_name
+
+# To view progressive output
+# qpeek 466569
+
+# To terminate the job prematurely:
+# $ qsig -s SIGINT 466569
+# OR
+# qdel 466569
+
+# ============================================================
+# What the code does
+
 # This example queries the humungous big.matrix file.
-# It does use multi-core cluster computing.
+# It does use multi-core computing on one node.
 # It does demonstrated how to benchmark R code for performance.
 
 # This example shows:
@@ -26,7 +43,7 @@
 # the necessary preprocessing on the (1987...2008).csv raw data files.
 # The preprocessed csv files are stored in the preprocessed folder
 # and then converted to big.matrix files and stored in the big_matrices folder.
-# Lots of flights do not have a tailnum for the plane.
+# Lots of flights do not have a tailnum for the plane. These are excluded.
 
 # ============================================================
 # Setup
@@ -48,7 +65,9 @@ project_storage_path <- "/lustre/pVPAC0012"
 input_folder_path <- paste(project_storage_path, "big_matrices", sep = "/")
 output_folder_path <- paste(project_storage_path, "big_matrices", sep = "/")
 
+# The full job
 descriptor_name <- "all.desc"
+# A short job for testing.
 # descriptor_name <- "2008.desc"
 
 flight_field_names <- list (
@@ -82,6 +101,7 @@ flight_field_names <- list (
     "SecurityDelay",
     "LateAircraftDelay")
 
+# Defined in map_string_fields.cpp
 missing_value <- -1
 
 # ============================================================
