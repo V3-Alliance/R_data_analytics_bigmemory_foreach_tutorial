@@ -169,7 +169,10 @@ start_time <- Sys.time()
 plane_start <- foreach(plane_index = 1:plane_count, .combine=rbind, .packages=c('doMC', 'bigmemory')) %dopar% {
 
     cat("\nPlane: ", plane_index, ": ", planes[plane_index])
-    all_flights <- attach_bigmatrix(descriptor_name)
+    
+    # Not needed with doMC but it is with multi-node processing.
+    # all_flights <- attach_bigmatrix(descriptor_name)
+    
     # Flight dates for one plane.
     # All on one line to ensure isolation as different processes access the all_flights matrix.
     flight_dates <- all_flights[mwhich(all_flights, plane_id_index, planes[plane_index], 'eq'), 
